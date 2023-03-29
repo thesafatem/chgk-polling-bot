@@ -1,26 +1,45 @@
 import { Controller, Get, Query, ValidationPipe } from '@nestjs/common';
 import { ChgkService } from './chgk.service';
-import { FindTournamentsQueryDto, WeekDay } from './dto/find-tournaments.query.dto';
-import { addHours, getDay, nextDay, nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday, setHours, startOfDay } from 'date-fns'
-import { utcToZonedTime, format } from 'date-fns-tz';
+import {
+	FindTournamentsQueryDto,
+	WeekDay,
+} from './dto/find-tournaments.query.dto';
+import {
+	addHours,
+	getDay,
+	nextDay,
+	nextFriday,
+	nextMonday,
+	nextSaturday,
+	nextSunday,
+	nextThursday,
+	nextTuesday,
+	nextWednesday,
+	startOfDay,
+} from 'date-fns';
+import { format } from 'date-fns-tz';
 import { MOSCOW_TIMEZONE, TIMEZONE_DIFFERENCE } from './chgk.constants';
 
 @Controller('chgk')
 export class ChgkController {
-	constructor(private readonly chgkService: ChgkService) { }
+	constructor(private readonly chgkService: ChgkService) {}
 
 	@Get('/')
-	async get(@Query(
-		new ValidationPipe({
-			transform: true,
-			transformOptions: { enableImplicitConversion: true },
-			forbidNonWhitelisted: true,
-		}),
-	) dto: FindTournamentsQueryDto) {
+	async get(
+		@Query(
+			new ValidationPipe({
+				transform: true,
+				transformOptions: { enableImplicitConversion: true },
+				forbidNonWhitelisted: true,
+			}),
+		)
+		dto: FindTournamentsQueryDto,
+	) {
 		const nextWeekDayDate = this.getNextWeekDayDate(dto.weekDay, dto.hours);
 		const formattedNextWeekDayDate = this.getFormattedDate(nextWeekDayDate);
-		console.log(formattedNextWeekDayDate)
-		const tournaments = await this.chgkService.getTournaments(formattedNextWeekDayDate);
+		const tournaments = await this.chgkService.getTournaments(
+			formattedNextWeekDayDate,
+		);
 		return tournaments;
 	}
 
@@ -47,7 +66,7 @@ export class ChgkController {
 	}
 
 	private getFormattedDate(date: Date): string {
-		const formatPattern = 'yyyy-MM-dd\'T\'HH:mm:ssXXX';
-		return format(date, formatPattern, { timeZone: MOSCOW_TIMEZONE })
+		const formatPattern = "yyyy-MM-dd'T'HH:mm:ssXXX";
+		return format(date, formatPattern, { timeZone: MOSCOW_TIMEZONE });
 	}
 }

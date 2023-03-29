@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsEnum, IsNumber, Max, Min } from 'class-validator'
+import { IsEnum, IsNumber, Max, Min } from 'class-validator';
 
 export enum WeekDay {
 	Monday = 'пн',
@@ -8,16 +8,16 @@ export enum WeekDay {
 	Thursday = 'чт',
 	Friday = 'пт',
 	Saturday = 'сб',
-	Sunday = 'вс'
+	Sunday = 'вс',
 }
 
 export class FindTournamentsQueryDto {
 	@IsEnum(WeekDay)
 	@Transform(({ value }) => value.toLowerCase())
-	weekDay: WeekDay
+	weekDay: WeekDay;
 
 	@IsNumber()
 	@Max(24)
 	@Min(0)
-	hours: number
+	hours: number;
 }
