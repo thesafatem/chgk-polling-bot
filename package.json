@@ -22,6 +22,7 @@
   "dependencies": {
     "@nestjs/axios": "^2.0.0",
     "@nestjs/common": "^9.0.0",
+    "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "class-transformer": "^0.5.1",
@@ -29,7 +30,8 @@
     "date-fns": "^2.29.3",
     "date-fns-tz": "^2.0.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "telegraf": "^4.12.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",

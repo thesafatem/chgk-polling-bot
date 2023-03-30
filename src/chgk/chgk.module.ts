@@ -7,5 +7,6 @@ import { HttpModule } from '@nestjs/axios';
 	providers: [ChgkService],
 	controllers: [ChgkController],
 	imports: [HttpModule],
+	exports: [ChgkService],
 })
 export class ChgkModule {}

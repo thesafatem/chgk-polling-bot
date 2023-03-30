@@ -5,4 +5,4 @@ export const API_URL = {
 export const SINHRON_TOURNAMENT_TYPE_ID = 3;
 export const MOSCOW_TIMEZONE = 'Europe/Moscow';
 export const TIMEZONE_DIFFERENCE = -3;
-export const FREE_TOURNAMENT_MESSAGE = 'Бесплатно';
+export const FREE_TOURNAMENT_MESSAGE = '0$';

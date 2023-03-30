@@ -1,4 +1,10 @@
-import { Controller, Get, Query, ValidationPipe } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Query,
+	UsePipes,
+	ValidationPipe,
+} from '@nestjs/common';
 import { ChgkService } from './chgk.service';
 import {
 	FindTournamentsQueryDto,
@@ -35,6 +41,16 @@ export class ChgkController {
 		)
 		dto: FindTournamentsQueryDto,
 	) {
+		const nextWeekDayDate = this.getNextWeekDayDate(dto.weekDay, dto.hours);
+		const formattedNextWeekDayDate = this.getFormattedDate(nextWeekDayDate);
+		const tournaments = await this.chgkService.getTournaments(
+			formattedNextWeekDayDate,
+		);
+		return tournaments;
+	}
+
+	@UsePipes(new ValidationPipe())
+	async check(dto: FindTournamentsQueryDto) {
 		const nextWeekDayDate = this.getNextWeekDayDate(dto.weekDay, dto.hours);
 		const formattedNextWeekDayDate = this.getFormattedDate(nextWeekDayDate);
 		const tournaments = await this.chgkService.getTournaments(
