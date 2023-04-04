@@ -82,6 +82,10 @@ export class TelegramService {
 			const nextWeekDayDate = getNextWeekDayDate(weekDay, hour);
 			const formattedDate = getFormattedDate(nextWeekDayDate, MOSCOW_TIMEZONE);
 			const tournaments = await this.chgkService.getTournaments(formattedDate);
+			console.log(tournaments);
+			// tournaments.filter(tournament => {
+			// 	return !chgkService.isTournamentPlayedInTown(tournamentId)
+			// })
 			const pollName = this.getPollName(numberOfTournaments);
 			await ctx.sendPoll(pollName, this.getPollingOptions(tournaments), {
 				is_anonymous: false,

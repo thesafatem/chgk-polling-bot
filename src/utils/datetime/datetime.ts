@@ -1,9 +1,23 @@
-import { nextDay, addHours, startOfDay, Day } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
+import { nextDay, Day, addMilliseconds, hoursToMilliseconds } from 'date-fns';
+import {
+	formatInTimeZone,
+	getTimezoneOffset,
+	utcToZonedTime,
+} from 'date-fns-tz';
+import { ALMATY_TIMEZONE } from 'src/chgk/chgk.constants';
 
 export function getNextWeekDayDate(weekDay: Day | number, hours: number): Date {
-	const today = addHours(startOfDay(new Date()), hours);
-	const nextDayValue = nextDay(today, weekDay as Day);
+	const today = utcToZonedTime(new Date(), 'Asia/Almaty');
+	const year = today.getFullYear();
+	const month = today.getMonth();
+	const date = today.getDate();
+	const hoursMs = hoursToMilliseconds(hours);
+	const offsetMs = getTimezoneOffset(ALMATY_TIMEZONE);
+	const dateWithHours = addMilliseconds(
+		new Date(year, month, date),
+		hoursMs - offsetMs,
+	);
+	const nextDayValue = nextDay(dateWithHours, weekDay as Day);
 	return nextDayValue;
 }
 

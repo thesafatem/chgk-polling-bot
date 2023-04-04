@@ -6,6 +6,7 @@ import {
 	FREE_TOURNAMENT_MESSAGE,
 	SINHRON_TOURNAMENT_TYPE_ID,
 } from './chgk.constants';
+import { TournamentRequestResponse } from './models/tournament-requests.model';
 import {
 	Currency,
 	CurrencySign,
@@ -39,6 +40,37 @@ export class ChgkService {
 		} catch (e) {
 			console.log(e);
 		}
+	}
+
+	async getTournamentRequests(
+		tournamentId: number,
+	): Promise<TournamentRequestResponse[]> {
+		const { data: tournamentRequests } = await lastValueFrom(
+			this.httpService.get<TournamentRequestResponse[]>(
+				API_URL.tournamentRequests(tournamentId),
+				{
+					params: {
+						pagination: false,
+					},
+				},
+			),
+		);
+
+		return tournamentRequests;
+	}
+
+	async isTournamentPlayedInTown(
+		tournamentId: number,
+		townId: number,
+	): Promise<boolean> {
+		const tournamentRequests: TournamentRequestResponse[] =
+			await this.getTournamentRequests(tournamentId);
+
+		const found = tournamentRequests.some((request) => {
+			return request.venue.town.id === townId;
+		});
+
+		return found;
 	}
 
 	private parseTournaments(tournaments: TournamentResponse[]): Tournament[] {
