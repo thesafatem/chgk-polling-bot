@@ -16,6 +16,7 @@ import {
 	TournamentResponse,
 	User,
 } from './models/tournament.model';
+import { TownResponse } from './models/town.model';
 
 @Injectable()
 export class ChgkService {
@@ -59,6 +60,18 @@ export class ChgkService {
 		return tournamentRequests;
 	}
 
+	async getTownsByName(townName: string): Promise<TownResponse[]> {
+		const { data: towns } = await lastValueFrom(
+			this.httpService.get<TownResponse[]>(API_URL.towns, {
+				params: {
+					name: townName,
+				},
+			}),
+		);
+
+		return towns;
+	}
+
 	async isTournamentPlayedInTown(
 		tournamentId: number,
 		townId: number,
@@ -67,7 +80,7 @@ export class ChgkService {
 			await this.getTournamentRequests(tournamentId);
 
 		const found = tournamentRequests.some((request) => {
-			return request.venue.town.id === townId;
+			return request.venue.town.id == townId;
 		});
 
 		return found;

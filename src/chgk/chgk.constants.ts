@@ -4,6 +4,7 @@ export const API_URL = {
 	tournamentRequests: function (tournamentId: number): string {
 		return API_ROOT_URL + '/tournaments/' + tournamentId + '/requests';
 	},
+	towns: API_ROOT_URL + '/towns',
 };
 export const SINHRON_TOURNAMENT_TYPE_ID = 3;
 export const MOSCOW_TIMEZONE = 'Europe/Moscow';
