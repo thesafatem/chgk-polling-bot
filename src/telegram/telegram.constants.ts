@@ -1,10 +1,21 @@
 export const TELEGRAM_MODULE_OPTIONS = 'TELEGRAM_MODULE_OPTIONS';
+
+export const TELEGRAM_POLL_MAX_OPTIONS = 10;
+
 export const WEEKDAY_IS_NOT_DEFINED = 'Не указан день недели';
 export const HOUR_IS_NOT_DEFINED = 'Не указано время';
 export const IRREGULAR_WEEKDAY = 'Неверно указан день недели';
+export const TOWN_IS_NOT_PROVIDED = 'Не указан город';
+export const NO_SUCH_TOWN = 'Неверный город';
+export const TOWN_IS_SET_SUCCESSFULLY = 'Город успешно обновлен';
+export const CHOOSE_DAY = 'Выберите день';
+export const CHOOSE_TIME = 'Выберите время';
+export const CHOOSE_NUMBER_OF_TOURNAMENTS = 'Выберите количество синхронов';
+
 export const DAY_REGEX = new RegExp(/week.*/);
 export const TIME_REGEX = new RegExp(/^[0-9]{1,2}:\d[0]$/);
 export const TOURNAMENT_NUMBER_REGEX = new RegExp(/\d/);
+
 export const INLINE_KEYBOARD_DAYS = [
 	[
 		{ name: 'Пн', data: 'week 1' },
