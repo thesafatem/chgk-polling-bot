@@ -3,7 +3,7 @@ services:
   mongo:
     image: mongo
     container_name: mongo
-    # network_mode: host
+    network_mode: host
     restart: always
     env_file:
       - .env
@@ -18,8 +18,7 @@ services:
       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   app:
-    # image: ghcr.io/thesafatem/chgk-polling-bot/chgk-polling-bot:develop
-    image: chgk-polling-bot:latest
+    image: ghcr.io/thesafatem/chgk-polling-bot/chgk-polling-bot:develop
     build: .
     container_name: app
     network_mode: host
