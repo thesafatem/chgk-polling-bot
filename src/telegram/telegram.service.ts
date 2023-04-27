@@ -21,6 +21,7 @@ import {
 	INLINE_KEYBOARD_DAYS,
 	INLINE_KEYBOARD_NUMBER_OF_TOURNAMENTS,
 	INLINE_KEYBOARD_TIME,
+	NO_ADMIN_PERMISSION,
 	NO_SUCH_TOWN,
 	TELEGRAM_MODULE_OPTIONS,
 	TELEGRAM_POLL_MAX_OPTIONS,
@@ -58,6 +59,7 @@ export class TelegramService {
 
 		this.bot.command('settown', async (ctx) => {
 			try {
+				await this.checkIsSenderAdmin(ctx);
 				const townName: string | null = ctx.update.message.text.split(' ')?.[1];
 				if (!townName) {
 					ctx.reply(TOWN_IS_NOT_PROVIDED);
@@ -73,18 +75,23 @@ export class TelegramService {
 				const townId = towns[0].id;
 				this.upsertTownByChatId(ctx.update.message.chat.id, townId);
 				ctx.reply(TOWN_IS_SET_SUCCESSFULLY);
-			} catch (error) {}
+			} catch (error) {
+				ctx.reply(error.message);
+			}
 		});
 
 		this.bot.command('createpoll', async (ctx) => {
 			try {
+				await this.checkIsSenderAdmin(ctx);
 				ctx.reply(CHOOSE_DAY, {
 					reply_markup: {
 						inline_keyboard: this.inlineKeyboardDays,
 					},
 					reply_to_message_id: ctx.message.message_id,
 				});
-			} catch (error) {}
+			} catch (error) {
+				ctx.reply(error.message);
+			}
 		});
 
 		this.bot.action(DAY_REGEX, async (ctx) => {
@@ -297,5 +304,15 @@ export class TelegramService {
 			return inlineKeyboardButtonRow;
 		});
 		return inlineKeyboard;
+	}
+
+	private async checkIsSenderAdmin(ctx: IContext): Promise<void> {
+		const admins = await this.bot.telegram.getChatAdministrators(ctx.chat.id);
+		const isSenderAdmin = admins.some((admin) => {
+			return admin.user.id === ctx.from.id;
+		});
+		if (!isSenderAdmin) {
+			throw new Error(NO_ADMIN_PERMISSION);
+		}
 	}
 }

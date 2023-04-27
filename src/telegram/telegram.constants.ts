@@ -7,6 +7,9 @@ export const HOUR_IS_NOT_DEFINED = 'Не указано время';
 export const IRREGULAR_WEEKDAY = 'Неверно указан день недели';
 export const TOWN_IS_NOT_PROVIDED = 'Не указан город';
 export const NO_SUCH_TOWN = 'Неверный город';
+export const NO_ADMIN_PERMISSION =
+	'Для использования этой функции нужны права администратора';
+
 export const TOWN_IS_SET_SUCCESSFULLY = 'Город успешно обновлен';
 export const CHOOSE_DAY = 'Выберите день';
 export const CHOOSE_TIME = 'Выберите время';
