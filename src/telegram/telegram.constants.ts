@@ -1,6 +1,7 @@
 export const TELEGRAM_MODULE_OPTIONS = 'TELEGRAM_MODULE_OPTIONS';
 
 export const TELEGRAM_POLL_MAX_OPTIONS = 10;
+export const TELEGRAM_POLL_OPTION_MAX_LENGTH = 100;
 
 export const WEEKDAY_IS_NOT_DEFINED = 'Не указан день недели';
 export const HOUR_IS_NOT_DEFINED = 'Не указано время';
@@ -12,6 +13,7 @@ export const NO_ADMIN_PERMISSION =
 export const TOWN_IS_NOT_SET = 'Не указан город для этого чата';
 
 export const TOWN_IS_SET_SUCCESSFULLY = 'Город успешно обновлен';
+export const POLL_IS_CREATED_SUCCESSFULLY = 'Опрос успешно создан';
 export const CHOOSE_DAY = 'Выберите день';
 export const CHOOSE_TIME = 'Выберите время';
 export const CHOOSE_NUMBER_OF_TOURNAMENTS = 'Выберите количество синхронов';

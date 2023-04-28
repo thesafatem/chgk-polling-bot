@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Inject } from '@nestjs/common/decorators/core/inject.decorator';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -23,8 +23,10 @@ import {
 	INLINE_KEYBOARD_TIME,
 	NO_ADMIN_PERMISSION,
 	NO_SUCH_TOWN,
+	POLL_IS_CREATED_SUCCESSFULLY,
 	TELEGRAM_MODULE_OPTIONS,
 	TELEGRAM_POLL_MAX_OPTIONS,
+	TELEGRAM_POLL_OPTION_MAX_LENGTH,
 	TIME_REGEX,
 	TOURNAMENT_NUMBER_REGEX,
 	TOWN_IS_NOT_PROVIDED,
@@ -37,6 +39,7 @@ import {
 	IContext,
 	Hideable,
 	UpdateContext,
+	MatchContext,
 } from './telegram.interface';
 
 @Injectable()
@@ -45,6 +48,7 @@ export class TelegramService {
 	inlineKeyboardDays: Hideable<InlineKeyboardButton.CallbackButton>[][];
 	inlineKeyboardTime: Hideable<InlineKeyboardButton.CallbackButton>[][];
 	inlineKeyboardNumberOfTournaments: Hideable<InlineKeyboardButton.CallbackButton>[][];
+	private readonly logger = new Logger(TelegramService.name);
 
 	constructor(
 		@Inject(TELEGRAM_MODULE_OPTIONS) options: ITelegramOptions,
@@ -75,11 +79,13 @@ export class TelegramService {
 				}
 				const townId = towns[0].id;
 				this.upsertTownByChatId(ctx.update.message.chat.id, townId);
+				this.logger.log(TOWN_IS_SET_SUCCESSFULLY);
 				ctx.reply(TOWN_IS_SET_SUCCESSFULLY);
 			} catch (error) {
 				if (error instanceof TelegramError) {
 					ctx.reply(error.message);
 				}
+				this.logger.error(error.message);
 			}
 		});
 
@@ -97,6 +103,7 @@ export class TelegramService {
 				if (error instanceof TelegramError) {
 					ctx.reply(error.message);
 				}
+				this.logger.error(error.message);
 			}
 		});
 
@@ -109,7 +116,7 @@ export class TelegramService {
 						numberOfTournaments: 0,
 					};
 				}
-				ctx.session.weekDay = Number(ctx.match[0].split(' ')[1]);
+				ctx.session.weekDay = this.parseWeekDayFromReplyKeyboard(ctx);
 				await ctx.editMessageText(CHOOSE_TIME);
 				await ctx.editMessageReplyMarkup({
 					inline_keyboard: this.inlineKeyboardTime,
@@ -118,12 +125,13 @@ export class TelegramService {
 				if (error instanceof TelegramError) {
 					ctx.reply(error.message);
 				}
+				this.logger.error(error.message);
 			}
 		});
 
 		this.bot.action(TIME_REGEX, async (ctx) => {
 			try {
-				ctx.session.hour = Number(ctx.match[0].split(':')[0]);
+				ctx.session.hour = this.parseHourFromReplyKeyboard(ctx);
 				await ctx.editMessageText(CHOOSE_NUMBER_OF_TOURNAMENTS);
 				await ctx.editMessageReplyMarkup({
 					inline_keyboard: this.inlineKeyboardNumberOfTournaments,
@@ -132,12 +140,14 @@ export class TelegramService {
 				if (error instanceof TelegramError) {
 					ctx.reply(error.message);
 				}
+				this.logger.error(error.message);
 			}
 		});
 
 		this.bot.action(TOURNAMENT_NUMBER_REGEX, async (ctx) => {
 			try {
-				ctx.session.numberOfTournaments = Number(ctx.match[0]);
+				ctx.session.numberOfTournaments =
+					this.parseNumberOfTournamentsFromReplyKeyboard(ctx);
 				const { weekDay, hour, numberOfTournaments } = ctx.session;
 				const nextWeekDayDate = getNextWeekDayDate(weekDay, hour);
 				const formattedDate = getFormattedDate(
@@ -158,6 +168,7 @@ export class TelegramService {
 				const topNotPlayedTournaments =
 					this.getTopTournaments(notPlayedTournaments);
 				const pollName = this.getPollName(numberOfTournaments);
+				ctx.deleteMessage(ctx.update.callback_query.message.message_id);
 				await ctx.sendPoll(
 					pollName,
 					this.getPollingOptions(topNotPlayedTournaments),
@@ -167,10 +178,12 @@ export class TelegramService {
 					},
 				);
 				ctx.session = undefined;
+				this.logger.log(POLL_IS_CREATED_SUCCESSFULLY);
 			} catch (error) {
 				if (error instanceof TelegramError) {
 					ctx.reply(error.message);
 				}
+				this.logger.error(error.message);
 				console.log(error);
 			}
 		});
@@ -256,11 +269,8 @@ export class TelegramService {
 
 		const shortenedName = this.getShortenedName(
 			tournament.name,
-			100 - optionWithoutTournamentName.length,
+			TELEGRAM_POLL_OPTION_MAX_LENGTH - optionWithoutTournamentName.length,
 		);
-		if ((shortenedName + optionWithoutTournamentName).length > 100) {
-			console.log(tournament, shortenedName, optionWithoutTournamentName);
-		}
 		return shortenedName + optionWithoutTournamentName;
 	}
 
@@ -346,5 +356,17 @@ export class TelegramService {
 		if (!chat || !chat?.townId) {
 			throw new TelegramError(TOWN_IS_NOT_SET);
 		}
+	}
+
+	private parseWeekDayFromReplyKeyboard(ctx: MatchContext): number {
+		return parseInt(ctx.match[0].split(' ')[1]);
+	}
+
+	private parseHourFromReplyKeyboard(ctx: MatchContext): number {
+		return parseInt(ctx.match[0].split(':')[0]);
+	}
+
+	private parseNumberOfTournamentsFromReplyKeyboard(ctx: MatchContext): number {
+		return parseInt(ctx.match[0]);
 	}
 }
