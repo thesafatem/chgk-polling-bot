@@ -28,13 +28,16 @@ import {
 	TIME_REGEX,
 	TOURNAMENT_NUMBER_REGEX,
 	TOWN_IS_NOT_PROVIDED,
+	TOWN_IS_NOT_SET,
 	TOWN_IS_SET_SUCCESSFULLY,
 } from './telegram.constants';
-import { ITelegramOptions, IContext } from './telegram.interface';
-
-type Hideable<A> = A & {
-	hide: boolean;
-};
+import { TelegramError } from './telegram.error';
+import {
+	ITelegramOptions,
+	IContext,
+	Hideable,
+	UpdateContext,
+} from './telegram.interface';
 
 @Injectable()
 export class TelegramService {
@@ -60,29 +63,30 @@ export class TelegramService {
 		this.bot.command('settown', async (ctx) => {
 			try {
 				await this.checkIsSenderAdmin(ctx);
-				const townName: string | null = ctx.update.message.text.split(' ')?.[1];
+				const townName = this.parseTownNameFromSetTownMessage(ctx);
 				if (!townName) {
-					ctx.reply(TOWN_IS_NOT_PROVIDED);
-					return;
+					throw new TelegramError(TOWN_IS_NOT_PROVIDED);
 				}
 				const towns: TownResponse[] = await this.chgkService.getTownsByName(
 					townName,
 				);
 				if (!towns.length) {
-					ctx.reply(NO_SUCH_TOWN);
-					return;
+					throw new TelegramError(NO_SUCH_TOWN);
 				}
 				const townId = towns[0].id;
 				this.upsertTownByChatId(ctx.update.message.chat.id, townId);
 				ctx.reply(TOWN_IS_SET_SUCCESSFULLY);
 			} catch (error) {
-				ctx.reply(error.message);
+				if (error instanceof TelegramError) {
+					ctx.reply(error.message);
+				}
 			}
 		});
 
 		this.bot.command('createpoll', async (ctx) => {
 			try {
 				await this.checkIsSenderAdmin(ctx);
+				await this.checkIsTownSet(ctx);
 				ctx.reply(CHOOSE_DAY, {
 					reply_markup: {
 						inline_keyboard: this.inlineKeyboardDays,
@@ -90,7 +94,9 @@ export class TelegramService {
 					reply_to_message_id: ctx.message.message_id,
 				});
 			} catch (error) {
-				ctx.reply(error.message);
+				if (error instanceof TelegramError) {
+					ctx.reply(error.message);
+				}
 			}
 		});
 
@@ -108,7 +114,11 @@ export class TelegramService {
 				await ctx.editMessageReplyMarkup({
 					inline_keyboard: this.inlineKeyboardTime,
 				});
-			} catch (error) {}
+			} catch (error) {
+				if (error instanceof TelegramError) {
+					ctx.reply(error.message);
+				}
+			}
 		});
 
 		this.bot.action(TIME_REGEX, async (ctx) => {
@@ -118,7 +128,11 @@ export class TelegramService {
 				await ctx.editMessageReplyMarkup({
 					inline_keyboard: this.inlineKeyboardNumberOfTournaments,
 				});
-			} catch (error) {}
+			} catch (error) {
+				if (error instanceof TelegramError) {
+					ctx.reply(error.message);
+				}
+			}
 		});
 
 		this.bot.action(TOURNAMENT_NUMBER_REGEX, async (ctx) => {
@@ -133,10 +147,13 @@ export class TelegramService {
 				const tournaments = await this.chgkService.getTournaments(
 					formattedDate,
 				);
-				const { townId } = await this.getChatById(ctx.chat.id);
+				const chat: Chat = await this.getChatById(ctx.chat.id);
+				if (!chat || !chat?.townId) {
+					throw new TelegramError(TOWN_IS_NOT_SET);
+				}
 				const notPlayedTournaments = await this.getNotPlayedTournaments(
 					tournaments,
-					townId,
+					chat.townId,
 				);
 				const topNotPlayedTournaments =
 					this.getTopTournaments(notPlayedTournaments);
@@ -151,6 +168,9 @@ export class TelegramService {
 				);
 				ctx.session = undefined;
 			} catch (error) {
+				if (error instanceof TelegramError) {
+					ctx.reply(error.message);
+				}
 				console.log(error);
 			}
 		});
@@ -170,6 +190,11 @@ export class TelegramService {
 	private async getChatById(chatId: number): Promise<ChatDocument | null> {
 		const chat = this.chatModel.findOne({ id: chatId });
 		return chat;
+	}
+
+	private parseTownNameFromSetTownMessage(ctx: UpdateContext): string | null {
+		const townName: string | null = ctx.update.message.text.split(' ')?.[1];
+		return townName;
 	}
 
 	private async getNotPlayedTournaments(
@@ -312,7 +337,14 @@ export class TelegramService {
 			return admin.user.id === ctx.from.id;
 		});
 		if (!isSenderAdmin) {
-			throw new Error(NO_ADMIN_PERMISSION);
+			throw new TelegramError(NO_ADMIN_PERMISSION);
+		}
+	}
+
+	private async checkIsTownSet(ctx: IContext): Promise<void> {
+		const chat: Chat = await this.getChatById(ctx.chat.id);
+		if (!chat || !chat?.townId) {
+			throw new TelegramError(TOWN_IS_NOT_SET);
 		}
 	}
 }

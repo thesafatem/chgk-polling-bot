@@ -1,5 +1,6 @@
 import { ModuleMetadata } from '@nestjs/common';
-import { Context } from 'telegraf';
+import { Context, NarrowedContext } from 'telegraf';
+import { Message, Update } from 'telegraf/typings/core/types/typegram';
 export interface ITelegramOptions {
 	token: string;
 }
@@ -18,3 +19,15 @@ interface SessionData {
 export interface IContext extends Context {
 	session?: SessionData;
 }
+
+export type Hideable<A> = A & {
+	hide: boolean;
+};
+
+export type UpdateContext = NarrowedContext<
+	IContext,
+	{
+		message: Update.New & Update.NonChannel & Message.TextMessage;
+		update_id: number;
+	}
+>;

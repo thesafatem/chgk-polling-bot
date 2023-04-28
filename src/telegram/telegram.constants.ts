@@ -9,6 +9,7 @@ export const TOWN_IS_NOT_PROVIDED = 'Не указан город';
 export const NO_SUCH_TOWN = 'Неверный город';
 export const NO_ADMIN_PERMISSION =
 	'Для использования этой функции нужны права администратора';
+export const TOWN_IS_NOT_SET = 'Не указан город для этого чата';
 
 export const TOWN_IS_SET_SUCCESSFULLY = 'Город успешно обновлен';
 export const CHOOSE_DAY = 'Выберите день';
