@@ -2,6 +2,7 @@ export const TELEGRAM_MODULE_OPTIONS = 'TELEGRAM_MODULE_OPTIONS';
 
 export const TELEGRAM_POLL_MAX_OPTIONS = 10;
 export const TELEGRAM_POLL_OPTION_MAX_LENGTH = 100;
+export const CHAT_TYPE_PRIVATE = 'private';
 
 export const WEEKDAY_IS_NOT_DEFINED = 'Не указан день недели';
 export const HOUR_IS_NOT_DEFINED = 'Не указано время';

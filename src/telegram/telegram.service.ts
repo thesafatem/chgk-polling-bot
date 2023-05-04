@@ -14,6 +14,7 @@ import { Markup, session, Telegraf } from 'telegraf';
 import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
 import { Chat, ChatDocument } from './models/chat.model';
 import {
+	CHAT_TYPE_PRIVATE,
 	CHOOSE_DAY,
 	CHOOSE_NUMBER_OF_TOURNAMENTS,
 	CHOOSE_TIME,
@@ -66,7 +67,7 @@ export class TelegramService {
 
 		this.bot.command('settown', async (ctx) => {
 			try {
-				await this.checkIsSenderAdmin(ctx);
+				await this.checkIsSenderAdminOrPrivateChat(ctx);
 				const townName = this.parseTownNameFromSetTownMessage(ctx);
 				if (!townName) {
 					throw new TelegramError(TOWN_IS_NOT_PROVIDED);
@@ -91,7 +92,7 @@ export class TelegramService {
 
 		this.bot.command('createpoll', async (ctx) => {
 			try {
-				await this.checkIsSenderAdmin(ctx);
+				await this.checkIsSenderAdminOrPrivateChat(ctx);
 				await this.checkIsTownSet(ctx);
 				ctx.reply(CHOOSE_DAY, {
 					reply_markup: {
@@ -341,7 +342,8 @@ export class TelegramService {
 		return inlineKeyboard;
 	}
 
-	private async checkIsSenderAdmin(ctx: IContext): Promise<void> {
+	private async checkIsSenderAdminOrPrivateChat(ctx: IContext): Promise<void> {
+		if (ctx.chat.type === CHAT_TYPE_PRIVATE) return;
 		const admins = await this.bot.telegram.getChatAdministrators(ctx.chat.id);
 		const isSenderAdmin = admins.some((admin) => {
 			return admin.user.id === ctx.from.id;
