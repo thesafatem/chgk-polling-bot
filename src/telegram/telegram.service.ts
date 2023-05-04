@@ -2,14 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Inject } from '@nestjs/common/decorators/core/inject.decorator';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { MOSCOW_TIMEZONE } from 'src/chgk/chgk.constants';
-import { ChgkService } from 'src/chgk/chgk.service';
-import { Editor, Tournament } from 'src/chgk/models/tournament.model';
-import { TownResponse } from 'src/chgk/models/town.model';
+import { MOSCOW_TIMEZONE } from '../chgk/chgk.constants';
+import { ChgkService } from '../chgk/chgk.service';
+import { Editor, Tournament } from '../chgk/models/tournament.model';
+import { TownResponse } from '../chgk/models/town.model';
 import {
 	getFormattedDate,
 	getNextWeekDayDate,
-} from 'src/utils/datetime/datetime';
+} from '../utils/datetime/datetime';
 import { Markup, session, Telegraf } from 'telegraf';
 import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
 import { Chat, ChatDocument } from './models/chat.model';
@@ -305,7 +305,7 @@ export class TelegramService {
 		return topThreeEditors.join(', ');
 	}
 
-	private getTournamentDeclension(numberOfTournaments: number): string {
+	getTournamentDeclension(numberOfTournaments: number): string {
 		switch (numberOfTournaments) {
 			case 1:
 				return 'синхрон';

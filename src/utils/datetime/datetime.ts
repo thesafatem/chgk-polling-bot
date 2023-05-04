@@ -4,7 +4,7 @@ import {
 	getTimezoneOffset,
 	utcToZonedTime,
 } from 'date-fns-tz';
-import { ALMATY_TIMEZONE } from 'src/chgk/chgk.constants';
+import { ALMATY_TIMEZONE } from '../../chgk/chgk.constants';
 
 export function getNextWeekDayDate(weekDay: Day | number, hours: number): Date {
 	const today = utcToZonedTime(new Date(), 'Asia/Almaty');
