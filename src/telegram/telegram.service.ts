@@ -10,6 +10,7 @@ import {
 	getFormattedDate,
 	getNextWeekDayDate,
 } from '../utils/datetime/datetime';
+import '../utils/telegram/string.extensions'
 import { Markup, session, Telegraf } from 'telegraf';
 import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
 import { Chat, ChatDocument } from './models/chat.model';
@@ -170,6 +171,7 @@ export class TelegramService {
 					this.getTopTournaments(notPlayedTournaments);
 				const pollName = this.getPollName(numberOfTournaments);
 				ctx.deleteMessage(ctx.update.callback_query.message.message_id);
+				await ctx.sendMessage(this.getTournamentsMessage(topNotPlayedTournaments), { parse_mode: 'HTML'});
 				await ctx.sendPoll(
 					pollName,
 					this.getPollingOptions(topNotPlayedTournaments),
@@ -251,28 +253,8 @@ export class TelegramService {
 	}
 
 	private getPollingOptions(tournaments: Tournament[]): string[] {
-		const options = tournaments.map((tournament) =>
-			this.prettifyTournamentData(tournament),
-		);
+		const options = tournaments.map((tournament: Tournament) => tournament.name);
 		return options;
-	}
-
-	private prettifyTournamentData(tournament: Tournament): string {
-		const optionWithoutTournamentName =
-			'(' +
-			this.getPrettifiedEditors(tournament.editors) +
-			') ' +
-			tournament.questionsCount +
-			', ' +
-			this.getDifficulty(tournament?.difficulty) +
-			', ' +
-			tournament.cost;
-
-		const shortenedName = this.getShortenedName(
-			tournament.name,
-			TELEGRAM_POLL_OPTION_MAX_LENGTH - optionWithoutTournamentName.length,
-		);
-		return shortenedName + optionWithoutTournamentName;
 	}
 
 	private getDifficulty(difficulty: number | null) {
@@ -282,31 +264,13 @@ export class TelegramService {
 		return '???';
 	}
 
-	private getShortenedName(name: string, symbolsLeft: number): string {
-		if (name.length + 1 <= symbolsLeft) return name + ' ';
-		const splittedName = name.split(' ');
-		let newName = '';
-		for (const namePiece of splittedName) {
-			if (newName.length + namePiece.length + 1 <= symbolsLeft) {
-				newName += namePiece + ' ';
-			} else {
-				break;
-			}
-		}
-		return newName;
+	private getEditorsAsString(editors: Editor[]): string {
+		return editors
+				.map((editor: Editor) => editor.surname)
+				.join(', ');
 	}
 
-	private getPrettifiedEditors(editors: Editor[]): string {
-		const topThreeEditors: string[] = editors
-			.slice(0, 3)
-			.map((editor) => editor.surname);
-		if (editors.length > 3) {
-			topThreeEditors.push('...');
-		}
-		return topThreeEditors.join(', ');
-	}
-
-	getTournamentDeclension(numberOfTournaments: number): string {
+	private getTournamentDeclension(numberOfTournaments: number): string {
 		switch (numberOfTournaments) {
 			case 1:
 				return 'синхрон';
@@ -370,5 +334,29 @@ export class TelegramService {
 
 	private parseNumberOfTournamentsFromReplyKeyboard(ctx: MatchContext): number {
 		return parseInt(ctx.match[0]);
+	}
+
+	private getTournamentNumberEmoji(tournamentNumber: number): string {
+		return ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'].at(tournamentNumber);
+	}
+
+	private getTournamentsMessage(tournaments: Tournament[]): string {
+		let message = '';
+		let tournamentNumber = 1;
+		for (const tournament of tournaments) {
+			const tournamentName = this.getTournamentNumberEmoji(tournamentNumber++) + ' ' + tournament.name.bold();
+			const editors = ('Редакторы: ' + this.getEditorsAsString(tournament.editors)).preformat();
+			const questions = 'Вопросы: ' + tournament.questionsCount;
+			const difficulty = 'Сложность: ' + this.getDifficulty(tournament?.difficulty);
+			const cost = 'Стоимость: ' + tournament.cost;
+			const tabulation = '   ';
+			message +=
+				tournamentName +  
+				'\n' + editors +
+				'\n' + ([questions, difficulty, cost].join(tabulation)).preformat() +
+				'\n\n';
+		}
+
+		return message;
 	}
 }
