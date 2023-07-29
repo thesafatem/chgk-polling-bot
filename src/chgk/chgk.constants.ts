@@ -8,5 +8,5 @@ export const API_URL = {
 };
 export const SINHRON_TOURNAMENT_TYPE_ID = 3;
 export const MOSCOW_TIMEZONE = 'Europe/Moscow';
-export const ALMATY_TIMEZONE = 'Asia/Almaty';
 export const FREE_TOURNAMENT_MESSAGE = '0$';
+export const RUSSIAN_LANGUAGE_ID = 'ru';

@@ -4,6 +4,7 @@ import { lastValueFrom } from 'rxjs';
 import {
 	API_URL,
 	FREE_TOURNAMENT_MESSAGE,
+	RUSSIAN_LANGUAGE_ID,
 	SINHRON_TOURNAMENT_TYPE_ID,
 } from './chgk.constants';
 import { TournamentRequestResponse } from './models/tournament-requests.model';
@@ -30,6 +31,7 @@ export class ChgkService {
 						'dateStart[before]': dateEndAfter,
 						'dateEnd[after]': dateEndAfter,
 						type: SINHRON_TOURNAMENT_TYPE_ID,
+						languages: RUSSIAN_LANGUAGE_ID
 					},
 				}),
 			);

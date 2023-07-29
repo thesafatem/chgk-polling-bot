@@ -23,6 +23,7 @@ export interface TournamentResponse {
 	maiiRating: boolean;
 	maiiRatingUpdatedAt: string;
 	questionQty: QuestionQty;
+	languages: Language[];
 }
 
 export interface Type {
@@ -56,6 +57,11 @@ export interface User {
 
 export interface QuestionQty {
 	[key: string]: number;
+}
+
+export interface Language {
+	id: string;
+	name: string;
 }
 
 export enum Currency {
