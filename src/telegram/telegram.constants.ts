@@ -12,8 +12,11 @@ export const NO_SUCH_TOWN = 'Неверный город';
 export const NO_ADMIN_PERMISSION =
 	'Для использования этой функции нужны права администратора';
 export const TOWN_IS_NOT_SET = 'Не указан город для этого чата';
-
 export const TOWN_IS_SET_SUCCESSFULLY = 'Город успешно обновлен';
+export const TIMEZONE_IS_NOT_PROVIDED = 'Не указан часовой пояс';
+export const TIMEZONE_IS_NOT_SET = 'Не указан часовой пояс для этого чата';
+export const TIMEZONE_IS_SET_SUCCESSFULLY = 'Часовой пояс успешно обновлен';
+export const CHAT_IS_NOT_SET = 'Данные группы не заполнены';
 export const POLL_IS_CREATED_SUCCESSFULLY = 'Опрос успешно создан';
 export const CHOOSE_DAY = 'Выберите день';
 export const CHOOSE_TIME = 'Выберите время';

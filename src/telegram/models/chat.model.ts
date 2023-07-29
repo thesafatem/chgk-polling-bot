@@ -8,6 +8,9 @@ export class Chat {
 
 	@Prop()
 	townId: number;
+
+	@Prop()
+	timeZone: string;
 }
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);

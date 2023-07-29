@@ -15,6 +15,7 @@ import { Markup, session, Telegraf } from 'telegraf';
 import { InlineKeyboardButton } from 'telegraf/typings/core/types/typegram';
 import { Chat, ChatDocument } from './models/chat.model';
 import {
+	CHAT_IS_NOT_SET,
 	CHAT_TYPE_PRIVATE,
 	CHOOSE_DAY,
 	CHOOSE_NUMBER_OF_TOURNAMENTS,
@@ -29,6 +30,9 @@ import {
 	TELEGRAM_MODULE_OPTIONS,
 	TELEGRAM_POLL_MAX_OPTIONS,
 	TELEGRAM_POLL_OPTION_MAX_LENGTH,
+	TIMEZONE_IS_NOT_PROVIDED,
+	TIMEZONE_IS_SET_SUCCESSFULLY,
+	TIMEZONE_IS_NOT_SET,
 	TIME_REGEX,
 	TOURNAMENT_NUMBER_REGEX,
 	TOWN_IS_NOT_PROVIDED,
@@ -66,10 +70,10 @@ export class TelegramService {
 		this.bot = new Telegraf<IContext>(options.token);
 		this.bot.use(session());
 
-		this.bot.command('settown', async (ctx) => {
+		this.bot.command('set_town', async (ctx) => {
 			try {
 				await this.checkIsSenderAdminOrPrivateChat(ctx);
-				const townName = this.parseTownNameFromSetTownMessage(ctx);
+				const [townName, ...args] = this.parseCommandArguments(ctx);
 				if (!townName) {
 					throw new TelegramError(TOWN_IS_NOT_PROVIDED);
 				}
@@ -91,10 +95,29 @@ export class TelegramService {
 			}
 		});
 
-		this.bot.command('createpoll', async (ctx) => {
+		this.bot.command('set_timezone', async (ctx) => {
 			try {
 				await this.checkIsSenderAdminOrPrivateChat(ctx);
-				await this.checkIsTownSet(ctx);
+				const [timeZoneOffset, ...args] = this.parseCommandArguments(ctx);
+				if (!timeZoneOffset) {
+					throw new TelegramError(TIMEZONE_IS_NOT_PROVIDED);
+				}
+				const timeZone: string = this.buildTimeZoneString(parseInt(timeZoneOffset));
+				this.upsertTimeZoneByChatId(ctx.update.message.chat.id, timeZone);
+				this.logger.log(TIMEZONE_IS_SET_SUCCESSFULLY);
+				ctx.reply(TIMEZONE_IS_SET_SUCCESSFULLY);
+			} catch (error) {
+				if (error instanceof TelegramError) {
+					ctx.reply(error.message);
+				}
+				this.logger.error(error.message);
+			}
+		})
+
+		this.bot.command('create_poll', async (ctx) => {
+			try {
+				await this.checkIsSenderAdminOrPrivateChat(ctx);
+				await this.checkIsChatDataSet(ctx);
 				ctx.reply(CHOOSE_DAY, {
 					reply_markup: {
 						inline_keyboard: this.inlineKeyboardDays,
@@ -150,8 +173,9 @@ export class TelegramService {
 			try {
 				ctx.session.numberOfTournaments =
 					this.parseNumberOfTournamentsFromReplyKeyboard(ctx);
+				const chat: Chat = await this.getChatById(ctx.chat.id);
 				const { weekDay, hour, numberOfTournaments } = ctx.session;
-				const nextWeekDayDate = getNextWeekDayDate(weekDay, hour);
+				const nextWeekDayDate = getNextWeekDayDate(chat.timeZone, weekDay, hour);
 				const formattedDate = getFormattedDate(
 					nextWeekDayDate,
 					MOSCOW_TIMEZONE,
@@ -159,10 +183,6 @@ export class TelegramService {
 				const tournaments = await this.chgkService.getTournaments(
 					formattedDate,
 				);
-				const chat: Chat = await this.getChatById(ctx.chat.id);
-				if (!chat || !chat?.townId) {
-					throw new TelegramError(TOWN_IS_NOT_SET);
-				}
 				const notPlayedTournaments = await this.getNotPlayedTournaments(
 					tournaments,
 					chat.townId,
@@ -203,14 +223,23 @@ export class TelegramService {
 			.exec();
 	}
 
+	private async upsertTimeZoneByChatId(
+		chatId: number,
+		timeZone: string
+	): Promise<ChatDocument | null> {
+		return this.chatModel
+			.findOneAndUpdate({ id: chatId }, { timeZone }, { upsert: true })
+			.exec();
+	}
+
 	private async getChatById(chatId: number): Promise<ChatDocument | null> {
 		const chat = this.chatModel.findOne({ id: chatId });
 		return chat;
 	}
 
-	private parseTownNameFromSetTownMessage(ctx: UpdateContext): string | null {
-		const townName: string | null = ctx.update.message.text.split(' ')?.[1];
-		return townName;
+	private parseCommandArguments(ctx: UpdateContext): string[] | null {
+		const args: string[] | null = ctx.update.message.text.split(' ')?.slice(1);
+		return args;
 	}
 
 	private async getNotPlayedTournaments(
@@ -317,11 +346,19 @@ export class TelegramService {
 		}
 	}
 
-	private async checkIsTownSet(ctx: IContext): Promise<void> {
+	private async checkIsChatDataSet(ctx: IContext): Promise<void> {
 		const chat: Chat = await this.getChatById(ctx.chat.id);
-		if (!chat || !chat?.townId) {
+		if (!chat) {
+			throw new TelegramError(CHAT_IS_NOT_SET);
+		}
+		if (!chat?.townId) {
 			throw new TelegramError(TOWN_IS_NOT_SET);
 		}
+		if (!chat?.timeZone) {
+			throw new TelegramError(TIMEZONE_IS_NOT_SET);
+		}
+		ctx.chat['townId'] = chat.townId;
+		ctx.chat['timeZone'] = chat.timeZone;
 	}
 
 	private parseWeekDayFromReplyKeyboard(ctx: MatchContext): number {
@@ -358,5 +395,12 @@ export class TelegramService {
 		}
 
 		return message;
+	}
+
+	private buildTimeZoneString(offset: number): string {
+		const absOffset: number = Math.abs(offset);
+		const sign: string = offset >= 0 ? '+' : '-';
+		const timeZone = `${sign}${Math.floor(absOffset / 10)}${absOffset % 10}:00`;
+		return timeZone;
 	}
 }
