@@ -85,6 +85,8 @@ export interface Tournament {
 	difficulty: number;
 	cost: string;
 	questionsCount: number;
+	maiiAegis: boolean;
+	maiiRating: boolean;
 }
 export interface Editor {
 	id: number;

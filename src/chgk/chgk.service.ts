@@ -103,6 +103,8 @@ export class ChgkService {
 				id: tournament.id,
 				name: tournament.name,
 				difficulty: tournament.difficultyForecast,
+				maiiAegis: tournament.maiiAegis,
+				maiiRating: tournament.maiiRating,
 				editors,
 				cost,
 				questionsCount,

@@ -4,6 +4,7 @@ import { Chat, ChatSchema } from './models/chat.model';
 import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
 import { ITelegramModuleAsyncOptions } from './telegram.interface';
 import { TelegramService } from './telegram.service';
+import { TelegramBot } from './telegram.bot';
 
 @Global()
 @Module({
@@ -22,8 +23,8 @@ export class TelegramModule {
 		return {
 			module: TelegramModule,
 			imports: options.imports,
-			providers: [TelegramService, asyncOptions],
-			exports: [TelegramService],
+			providers: [asyncOptions, TelegramBot, TelegramService],
+			exports: [TelegramBot],
 		};
 	}
 
