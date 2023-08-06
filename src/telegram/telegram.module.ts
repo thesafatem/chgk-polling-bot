@@ -1,22 +1,9 @@
-import { DynamicModule, Global, Module, Provider } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Chat, ChatSchema } from './models/chat.model';
+import { DynamicModule, Provider } from '@nestjs/common';
 import { TELEGRAM_MODULE_OPTIONS } from './telegram.constants';
 import { ITelegramModuleAsyncOptions } from './telegram.interface';
 import { TelegramService } from './telegram.service';
 import { TelegramBot } from './telegram.bot';
 
-@Global()
-@Module({
-	imports: [
-		MongooseModule.forFeature([
-			{
-				name: Chat.name,
-				schema: ChatSchema,
-			},
-		]),
-	],
-})
 export class TelegramModule {
 	static forRootAsync(options: ITelegramModuleAsyncOptions): DynamicModule {
 		const asyncOptions = this.createAsyncOptionsProvider(options);

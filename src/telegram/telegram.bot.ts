@@ -39,7 +39,7 @@ export class TelegramBot {
 			new CreatePollCommand(this.bot, this.telegramService, this.logger),
             new ChooseDayAction(this.bot, this.telegramService, this.logger),
             new ChooseTimeAction(this.bot, this.telegramService, this.logger),
-            new ChooseNumberOfTournamentsAction(this.bot, this.chgkService, this.telegramService, this.logger),
+            new ChooseNumberOfTournamentsAction(this.bot, this.chgkService, this.logger),
 		]
 		for (const command of this.commands) {
 			command.handle();

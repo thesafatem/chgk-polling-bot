@@ -7,13 +7,22 @@ import { ChgkModule } from './chgk/chgk.module';
 import { getMongoConfig } from './configs/mongo.config';
 import { getTelegramConfig } from './configs/telegram.config';
 import { TelegramModule } from './telegram/telegram.module';
+import { Chat, ChatSchema } from './telegram/models/chat.model';
 
 @Module({
 	imports: [
 		ChgkModule,
 		ConfigModule.forRoot(),
 		TelegramModule.forRootAsync({
-			imports: [ConfigModule, ChgkModule],
+			imports: [
+				ConfigModule, ChgkModule,
+				MongooseModule.forFeature([
+					{
+						name: Chat.name,
+						schema: ChatSchema,
+					},
+				]),
+			],
 			inject: [ConfigService],
 			useFactory: getTelegramConfig,
 		}),

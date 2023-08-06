@@ -5,7 +5,6 @@ import { POLL_IS_CREATED_SUCCESSFULLY, TELEGRAM_POLL_MAX_OPTIONS, TOURNAMENT_NUM
 import { Logger } from "@nestjs/common";
 import { TelegramError } from "../telegram.error";
 import { TelegramService } from "../telegram.service";
-import { Chat } from "../models/chat.model";
 import { getFormattedDate, getNextWeekDayDate } from "src/utils/datetime/datetime";
 import { MOSCOW_TIMEZONE } from "src/chgk/chgk.constants";
 import { ChgkService } from "src/chgk/chgk.service";
@@ -16,7 +15,6 @@ export class ChooseNumberOfTournamentsAction extends Command {
     constructor(
         bot: Telegraf<IContext>,
         private readonly chgkService: ChgkService,
-        private readonly telegramService: TelegramService,
         private readonly logger: Logger,
     ) {
         super(bot);
@@ -27,9 +25,8 @@ export class ChooseNumberOfTournamentsAction extends Command {
             try {
 				ctx.session.numberOfTournaments =
 					this.parseNumberOfTournamentsFromReplyKeyboard(ctx);
-				const chat: Chat = await this.telegramService.getChatById(ctx.chat.id);
 				const { weekDay, hour, numberOfTournaments } = ctx.session;
-				const nextWeekDayDate = getNextWeekDayDate(chat.timeZone, weekDay, hour);
+				const nextWeekDayDate = getNextWeekDayDate(ctx.chat['timeZone'], weekDay, hour);
 				const formattedDate = getFormattedDate(
 					nextWeekDayDate,
 					MOSCOW_TIMEZONE,
@@ -39,7 +36,7 @@ export class ChooseNumberOfTournamentsAction extends Command {
 				);
 				const notPlayedTournaments = await this.getNotPlayedTournaments(
 					tournaments,
-					chat.townId,
+					ctx.chat['townId'],
 				);
 				const topNotPlayedTournaments =
 					this.getTopTournaments(notPlayedTournaments);
@@ -61,7 +58,6 @@ export class ChooseNumberOfTournamentsAction extends Command {
 					ctx.reply(error.message);
 				}
 				this.logger.error(error.message);
-				console.log(error);
 			}
         });
     }
