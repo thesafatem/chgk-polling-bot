@@ -8,6 +8,7 @@ import { getMongoConfig } from './configs/mongo.config';
 import { getTelegramConfig } from './configs/telegram.config';
 import { TelegramModule } from './telegram/telegram.module';
 import { Chat, ChatSchema } from './telegram/models/chat.model';
+import { CurrencyModule } from './currency/currency.module';
 
 @Module({
 	imports: [
@@ -15,7 +16,7 @@ import { Chat, ChatSchema } from './telegram/models/chat.model';
 		ConfigModule.forRoot(),
 		TelegramModule.forRootAsync({
 			imports: [
-				ConfigModule, ChgkModule,
+				ConfigModule, ChgkModule, CurrencyModule,
 				MongooseModule.forFeature([
 					{
 						name: Chat.name,
@@ -31,6 +32,7 @@ import { Chat, ChatSchema } from './telegram/models/chat.model';
 			inject: [ConfigService],
 			useFactory: getMongoConfig,
 		}),
+		CurrencyModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

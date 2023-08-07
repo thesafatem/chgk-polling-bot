@@ -83,10 +83,12 @@ export interface Tournament {
 	name: string;
 	editors: Editor[];
 	difficulty: number;
-	cost: string;
 	questionsCount: number;
 	maiiAegis: boolean;
 	maiiRating: boolean;
+	mainPayment: number;
+	currency: Currency;
+	cost?: string;
 }
 export interface Editor {
 	id: number;

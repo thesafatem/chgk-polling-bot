@@ -11,6 +11,9 @@ export class Chat {
 
 	@Prop()
 	timeZone: string;
+
+	@Prop()
+	currency: string;
 }
 
 export const ChatSchema = SchemaFactory.createForClass(Chat);

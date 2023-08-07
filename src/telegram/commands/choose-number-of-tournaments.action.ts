@@ -1,20 +1,22 @@
 import { Telegraf } from "telegraf";
 import { Command } from "./command.class";
 import { IContext, MatchContext } from "../telegram.interface";
-import { POLL_IS_CREATED_SUCCESSFULLY, TELEGRAM_POLL_MAX_OPTIONS, TOURNAMENT_NUMBER_REGEX } from "../telegram.constants";
+import { FREE_TOURNAMENT_MESSAGE, POLL_IS_CREATED_SUCCESSFULLY, TELEGRAM_POLL_MAX_OPTIONS, TOURNAMENT_NUMBER_REGEX } from "../telegram.constants";
 import { Logger } from "@nestjs/common";
 import { TelegramError } from "../telegram.error";
-import { TelegramService } from "../telegram.service";
 import { getFormattedDate, getNextWeekDayDate } from "src/utils/datetime/datetime";
 import { MOSCOW_TIMEZONE } from "src/chgk/chgk.constants";
 import { ChgkService } from "src/chgk/chgk.service";
 import { Editor, Tournament } from "src/chgk/models/tournament.model";
 import '../../utils/telegram/string.extensions'
+import { CURRENCY_CHGK_API_TO_CODE_MAPPING } from "src/currency/currency.constants";
+import { CurrencyService } from "src/currency/currency.service";
 
 export class ChooseNumberOfTournamentsAction extends Command {
     constructor(
         bot: Telegraf<IContext>,
         private readonly chgkService: ChgkService,
+		private readonly currencyService: CurrencyService,
         private readonly logger: Logger,
     ) {
         super(bot);
@@ -31,21 +33,21 @@ export class ChooseNumberOfTournamentsAction extends Command {
 					nextWeekDayDate,
 					MOSCOW_TIMEZONE,
 				);
-				const tournaments = await this.chgkService.getTournaments(
+				let tournaments = await this.chgkService.getTournaments(
 					formattedDate,
 				);
-				const notPlayedTournaments = await this.getNotPlayedTournaments(
+				tournaments = await this.getNotPlayedTournaments(
 					tournaments,
 					ctx.chat['townId'],
 				);
-				const topNotPlayedTournaments =
-					this.getTopTournaments(notPlayedTournaments);
+				tournaments = this.getTopTournaments(tournaments);
+				tournaments = await this.calcTournamentsCost(tournaments, 'KZT');
 				const pollName = this.getPollName(numberOfTournaments);
 				ctx.deleteMessage(ctx.update.callback_query.message.message_id);
-				await ctx.sendMessage(this.getTournamentsMessage(topNotPlayedTournaments), { parse_mode: 'HTML'});
+				await ctx.sendMessage(this.getTournamentsMessage(tournaments), { parse_mode: 'HTML'});
 				await ctx.sendPoll(
 					pollName,
-					this.getPollingOptions(topNotPlayedTournaments),
+					this.getPollingOptions(tournaments),
 					{
 						is_anonymous: false,
 						allows_multiple_answers: numberOfTournaments > 1,
@@ -115,6 +117,27 @@ export class ChooseNumberOfTournamentsAction extends Command {
 		}
 	}
 
+	private async calcTournamentsCost(tournaments: Tournament[], chatCurrency: string): Promise<Tournament[]> {
+		const latestRate = await this.currencyService.getLatestRate(chatCurrency);
+		tournaments.forEach(tournament => {
+			tournament.cost = this.calcTournamentCost(
+				tournament, 
+				latestRate[CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency]].value, 
+				chatCurrency
+			);
+		})
+
+		return tournaments;
+	}
+
+	private calcTournamentCost(tournament: Tournament, currencyRate: number, chatCurrency: string): string {
+		if (tournament.mainPayment === 0) return FREE_TOURNAMENT_MESSAGE;
+		const newPayment = tournament.mainPayment / currencyRate;
+		return tournament.mainPayment 
+			+ ' ' + CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency]
+			+ ' (≈' + newPayment.toFixed(0) + ' ' + chatCurrency + ')';
+	}
+
 	private getPollName(numberOfTournaments: number): string {
 		return (
 			'Выбираем ' +
@@ -135,10 +158,10 @@ export class ChooseNumberOfTournamentsAction extends Command {
 	}
 
     private getDifficulty(difficulty: number | null) {
-		if (difficulty) {
-			return difficulty.toFixed(1);
+		if (!difficulty) {
+			return '???';
 		}
-		return '???';
+		return difficulty.toFixed(1);
 	}
 
     private getTournamentsMessage(tournaments: Tournament[]): string {
@@ -156,7 +179,8 @@ export class ChooseNumberOfTournamentsAction extends Command {
 			message +=
 				tournamentName +  
 				'\n' + editors +
-				'\n' + ([questions, difficulty, cost].join(tabulation)).preformat() +
+				'\n' + ([questions, difficulty].join(tabulation)).preformat() +
+				'\n' + cost.preformat() + 
                 '\n' + ([aegis, rating].join(tabulation)).preformat() + 
 				'\n\n';
 		}

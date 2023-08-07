@@ -42,6 +42,15 @@ export class TelegramService {
 			.exec();
 	}
 
+	async upsertCurrencyByChatId(
+		chatId: number,
+		currency: string
+	): Promise<ChatDocument | null> {
+		return this.chatModel
+			.findOneAndUpdate({ id: chatId }, { currency }, { upsert: true })
+			.exec();
+	}
+
 	async getChatById(chatId: number): Promise<ChatDocument | null> {
 		const chat = this.chatModel.findOne({ id: chatId });
 		return chat;

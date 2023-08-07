@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import {
 	API_URL,
-	FREE_TOURNAMENT_MESSAGE,
 	RUSSIAN_LANGUAGE_ID,
 	SINHRON_TOURNAMENT_TYPE_ID,
 } from './chgk.constants';
@@ -91,10 +90,6 @@ export class ChgkService {
 	private parseTournaments(tournaments: TournamentResponse[]): Tournament[] {
 		const parsedTournaments = tournaments.map((tournament) => {
 			const editors: Editor[] = this.parseEditors(tournament.editors);
-			const cost: string = this.parseCost(
-				tournament.mainPayment,
-				tournament.currency,
-			);
 			const questionsCount: number = this.parseQuestionsCount(
 				tournament.questionQty,
 			);
@@ -106,10 +101,12 @@ export class ChgkService {
 				maiiAegis: tournament.maiiAegis,
 				maiiRating: tournament.maiiRating,
 				editors,
-				cost,
 				questionsCount,
+				mainPayment: tournament.mainPayment,
+				currency: tournament.currency
 			};
 		});
+		
 		return parsedTournaments;
 	}
 
@@ -121,13 +118,6 @@ export class ChgkService {
 			};
 		});
 		return parsedEditors;
-	}
-
-	private parseCost(mainPayment: number, currency: Currency): string {
-		if (mainPayment === 0) {
-			return FREE_TOURNAMENT_MESSAGE;
-		}
-		return mainPayment + this.getCurrencySign(currency);
 	}
 
 	private parseQuestionsCount(questionQty: QuestionQty): number {

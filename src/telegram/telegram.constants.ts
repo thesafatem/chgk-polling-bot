@@ -21,10 +21,15 @@ export const POLL_IS_CREATED_SUCCESSFULLY = 'Опрос успешно созд�
 export const CHOOSE_DAY = 'Выберите день';
 export const CHOOSE_TIME = 'Выберите время';
 export const CHOOSE_NUMBER_OF_TOURNAMENTS = 'Выберите количество синхронов';
+export const CHOOSE_CURRENCY = 'Выберите валюту';
+export const CURRENCY_IS_SET_SUCCESSFULLY = 'Валюта успешно обновлена';
 
 export const DAY_REGEX = new RegExp(/week.*/);
 export const TIME_REGEX = new RegExp(/^[0-9]{1,2}:\d[0]$/);
 export const TOURNAMENT_NUMBER_REGEX = new RegExp(/\d/);
+
+export const CURRENCIES = ['USD', 'EUR', 'RUB', 'UAH', 'KZT', 'BYR', 'UZS'];
+export const FREE_TOURNAMENT_MESSAGE = 'Беслпатно';
 
 export const INLINE_KEYBOARD_DAYS = [
 	[
@@ -80,3 +85,9 @@ export const INLINE_KEYBOARD_NUMBER_OF_TOURNAMENTS = [
 		{ name: '3', data: '3' },
 	],
 ];
+export const INLINE_KEYBOARD_CURRENCIES = [CURRENCIES.map(currency => {
+	return { 
+		name: currency, 
+		data: currency 
+	};
+})];
