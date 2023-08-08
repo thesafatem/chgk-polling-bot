@@ -11,11 +11,13 @@ import { Editor, Tournament } from "src/chgk/models/tournament.model";
 import '../../utils/telegram/string.extensions'
 import { CURRENCY_CHGK_API_TO_CODE_MAPPING } from "src/currency/currency.constants";
 import { CurrencyService } from "src/currency/currency.service";
+import { TelegramService } from "../telegram.service";
 
 export class ChooseNumberOfTournamentsAction extends Command {
     constructor(
         bot: Telegraf<IContext>,
         private readonly chgkService: ChgkService,
+		private readonly telegramService: TelegramService,
 		private readonly currencyService: CurrencyService,
         private readonly logger: Logger,
     ) {
@@ -28,7 +30,8 @@ export class ChooseNumberOfTournamentsAction extends Command {
 				ctx.session.numberOfTournaments =
 					this.parseNumberOfTournamentsFromReplyKeyboard(ctx);
 				const { weekDay, hour, numberOfTournaments } = ctx.session;
-				const nextWeekDayDate = getNextWeekDayDate(ctx.chat['timeZone'], weekDay, hour);
+				const chat = await this.telegramService.getChatById(ctx.chat.id);
+				const nextWeekDayDate = getNextWeekDayDate(chat.timeZone, weekDay, hour);
 				const formattedDate = getFormattedDate(
 					nextWeekDayDate,
 					MOSCOW_TIMEZONE,
@@ -38,13 +41,12 @@ export class ChooseNumberOfTournamentsAction extends Command {
 				);
 				tournaments = await this.getNotPlayedTournaments(
 					tournaments,
-					ctx.chat['townId'],
+					chat.townId,
 				);
 				tournaments = this.getTopTournaments(tournaments);
 				const pollName = this.getPollName(numberOfTournaments);
 				ctx.deleteMessage(ctx.update.callback_query.message.message_id);
-				console.log(ctx.chat['currency']);
-				const tournamentsDescription = await this.getTournamentsDescription(tournaments, ctx.chat['currency']);
+				const tournamentsDescription = await this.getTournamentsDescription(tournaments, chat.currency);
 				await ctx.sendMessage(tournamentsDescription, { parse_mode: 'HTML'});
 				await ctx.sendPoll(
 					pollName,

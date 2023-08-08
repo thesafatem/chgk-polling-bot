@@ -100,8 +100,5 @@ export class TelegramService {
 		if (!chat?.timeZone) {
 			throw new TelegramError(TIMEZONE_IS_NOT_SET);
 		}
-		ctx.chat['townId'] = chat.townId;
-		ctx.chat['timeZone'] = chat.timeZone;
-		ctx.chat['currency'] = chat.currency;
 	}
 }
