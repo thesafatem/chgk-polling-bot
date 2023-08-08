@@ -9,10 +9,12 @@ import { getTelegramConfig } from './configs/telegram.config';
 import { TelegramModule } from './telegram/telegram.module';
 import { Chat, ChatSchema } from './telegram/models/chat.model';
 import { CurrencyModule } from './currency/currency.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
 	imports: [
 		ChgkModule,
+		CurrencyModule,
 		ConfigModule.forRoot(),
 		TelegramModule.forRootAsync({
 			imports: [
@@ -32,7 +34,7 @@ import { CurrencyModule } from './currency/currency.module';
 			inject: [ConfigService],
 			useFactory: getMongoConfig,
 		}),
-		CurrencyModule,
+		ScheduleModule.forRoot(),
 	],
 	controllers: [AppController],
 	providers: [AppService],

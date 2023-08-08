@@ -41,10 +41,11 @@ export class ChooseNumberOfTournamentsAction extends Command {
 					ctx.chat['townId'],
 				);
 				tournaments = this.getTopTournaments(tournaments);
-				tournaments = await this.calcTournamentsCost(tournaments, 'KZT');
 				const pollName = this.getPollName(numberOfTournaments);
 				ctx.deleteMessage(ctx.update.callback_query.message.message_id);
-				await ctx.sendMessage(this.getTournamentsMessage(tournaments), { parse_mode: 'HTML'});
+				console.log(ctx.chat['currency']);
+				const tournamentsDescription = await this.getTournamentsDescription(tournaments, ctx.chat['currency']);
+				await ctx.sendMessage(tournamentsDescription, { parse_mode: 'HTML'});
 				await ctx.sendPoll(
 					pollName,
 					this.getPollingOptions(tournaments),
@@ -117,25 +118,16 @@ export class ChooseNumberOfTournamentsAction extends Command {
 		}
 	}
 
-	private async calcTournamentsCost(tournaments: Tournament[], chatCurrency: string): Promise<Tournament[]> {
-		const latestRate = await this.currencyService.getLatestRate(chatCurrency);
-		tournaments.forEach(tournament => {
-			tournament.cost = this.calcTournamentCost(
-				tournament, 
-				latestRate[CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency]].value, 
-				chatCurrency
-			);
-		})
-
-		return tournaments;
-	}
-
-	private calcTournamentCost(tournament: Tournament, currencyRate: number, chatCurrency: string): string {
+	private async getTournamentCostMessage(tournament: Tournament, chatCurrency?: string): Promise<string> {
 		if (tournament.mainPayment === 0) return FREE_TOURNAMENT_MESSAGE;
-		const newPayment = tournament.mainPayment / currencyRate;
-		return tournament.mainPayment 
-			+ ' ' + CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency]
-			+ ' (≈' + newPayment.toFixed(0) + ' ' + chatCurrency + ')';
+		const paymentMessage = tournament.mainPayment + ' ' + CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency];
+		if (!chatCurrency) return paymentMessage;
+		const currencyRate = 
+			await this.currencyService.getLatestRateOfTwoCurrencies(
+				CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency], chatCurrency
+			);
+		const newPayment = tournament.mainPayment * currencyRate;
+		return paymentMessage + ' (≈' + newPayment.toFixed(0) + ' ' + chatCurrency + ')';
 	}
 
 	private getPollName(numberOfTournaments: number): string {
@@ -164,7 +156,7 @@ export class ChooseNumberOfTournamentsAction extends Command {
 		return difficulty.toFixed(1);
 	}
 
-    private getTournamentsMessage(tournaments: Tournament[]): string {
+    private async getTournamentsDescription(tournaments: Tournament[], chatCurrency?: string): Promise<string> {
 		let message = '';
 		let tournamentNumber = 1;
 		for (const tournament of tournaments) {
@@ -172,7 +164,7 @@ export class ChooseNumberOfTournamentsAction extends Command {
 			const editors = ('Редакторы: ' + this.getEditorsAsString(tournament.editors)).preformat();
 			const questions = 'Вопросы: ' + tournament.questionsCount;
 			const difficulty = 'Сложность: ' + this.getDifficulty(tournament?.difficulty);
-			const cost = 'Стоимость: ' + tournament.cost;
+			const cost = 'Стоимость: ' + await this.getTournamentCostMessage(tournament, chatCurrency);
             const aegis = 'Эгида МАИИ: ' + (tournament.maiiAegis ? '✅' : '🚫');
             const rating = 'Рейтингуется: ' + (tournament.maiiRating ? '✅' : '🚫');
 			const tabulation = '   ';

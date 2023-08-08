@@ -11,3 +11,10 @@ export interface CurrencyRate {
     code: string;
     value: number;
 }
+
+export interface LatestRate {
+    baseCurrency: string;
+    rates: {
+        [key: string]: CurrencyRate
+    }
+}

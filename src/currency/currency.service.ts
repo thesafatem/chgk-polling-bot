@@ -3,20 +3,24 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { lastValueFrom } from 'rxjs';
 import { API_URL } from './currency.constants';
-import { LatestResponse } from './models/latest.model';
+import { LatestRate, LatestResponse } from './models/latest.model';
+import { Currency, CurrencyDocument } from './models/currency.model';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 
 @Injectable()
 export class CurrencyService {
     private readonly token: string;
 
     constructor(
+        @InjectModel(Currency.name) private currencyModel: Model<CurrencyDocument>,
         private readonly configService: ConfigService,
         private readonly httpService: HttpService
     ) {
         this.token = this.configService.get<string>('CURRENCY_TOKEN');
     }
 
-    async getLatestRate(baseCurrency?: string, currencies?: string[]) {
+    async getLatestRate(baseCurrency?: string, currencies?: string[]): Promise<LatestRate> {
         try {
             const params = {
                 apikey: this.token,
@@ -32,9 +36,33 @@ export class CurrencyService {
                 this.httpService.get<LatestResponse>(API_URL.latest, { params })
             );
 
-            return latestResponse.data;
+            return {
+                rates: latestResponse.data,
+                baseCurrency: baseCurrency ?? 'USD'
+            }
         } catch (error) {
             console.log(error);
         }
+    }
+
+    async updateByBaseCurrency({baseCurrency, rates}: LatestRate): Promise<CurrencyDocument> {
+        return this.currencyModel.findOneAndUpdate(
+            { baseCurrency },
+            { rates },
+            { upsert: true }
+        ).exec();
+    }
+
+    async getLatestRateOfTwoCurrencies(baseCurrency: string, targetCurrency: string): Promise<number> {
+        const { rates: { [targetCurrency]: { value } } } = await this.currencyModel.findOne(
+            { baseCurrency },
+            {
+                rates: {
+                    [targetCurrency]: 1
+                }
+            }
+        ).exec();
+        
+        return value;
     }
 }

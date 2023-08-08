@@ -102,5 +102,6 @@ export class TelegramService {
 		}
 		ctx.chat['townId'] = chat.townId;
 		ctx.chat['timeZone'] = chat.timeZone;
+		ctx.chat['currency'] = chat.currency;
 	}
 }
