@@ -15,14 +15,18 @@ export class CurrencyController implements OnModuleInit {
 
     @Cron('* */12 * * *')
     async updateLatestCurrenciesRates(): Promise<void> {
-        const latestRates = await Promise.all(
-            Object.values(CURRENCY_CHGK_API_TO_CODE_MAPPING).map(baseCurrency => {
-                return this.currencyService.getLatestRate(baseCurrency);
+        try {
+            const latestRates = await Promise.all(
+                Object.values(CURRENCY_CHGK_API_TO_CODE_MAPPING).map(baseCurrency => {
+                    return this.currencyService.getLatestRate(baseCurrency);
+                })
+            );
+    
+            latestRates.forEach(latestRate => {
+                this.currencyService.updateByBaseCurrency(latestRate);
             })
-        );
-
-        latestRates.forEach(latestRate => {
-            this.currencyService.updateByBaseCurrency(latestRate);
-        })
+        } catch (e) {
+            console.log('AAAAA', e);
+        }
     }
 }
