@@ -21,27 +21,23 @@ export class CurrencyService {
     }
 
     async getLatestRate(baseCurrency?: string, currencies?: string[]): Promise<LatestRate> {
-        try {
-            const params = {
-                apikey: this.token,
-            }
-            if (baseCurrency) {
-                params['base_currency'] = baseCurrency;
-            }
-            if (currencies) {
-                params['currencies'] = currencies;
-            }
+        const params = {
+            apikey: this.token,
+        }
+        if (baseCurrency) {
+            params['base_currency'] = baseCurrency;
+        }
+        if (currencies) {
+            params['currencies'] = currencies;
+        }
 
-            const { data: latestResponse } = await lastValueFrom(
-                this.httpService.get<LatestResponse>(API_URL.latest, { params })
-            );
+        const { data: latestResponse } = await lastValueFrom(
+            this.httpService.get<LatestResponse>(API_URL.latest, { params })
+        );
 
-            return {
-                rates: latestResponse.data,
-                baseCurrency: baseCurrency ?? 'USD'
-            }
-        } catch (error) {
-            console.log(error);
+        return {
+            rates: latestResponse.data,
+            baseCurrency: baseCurrency ?? 'USD'
         }
     }
 
