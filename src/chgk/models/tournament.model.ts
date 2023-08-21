@@ -67,15 +67,13 @@ export interface Language {
 export enum Currency {
 	EUR = 'e',
 	RUB = 'r',
-	USD = 'd',
-	UAH = 'u',
+	USD = 'u',
 }
 
 export enum CurrencySign {
 	EUR = '€',
 	RUB = '₽',
 	USD = '$',
-	UAH = '₴',
 }
 
 export interface Tournament {

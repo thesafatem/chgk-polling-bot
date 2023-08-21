@@ -5,6 +5,5 @@ export const API_URL = {
 export const CURRENCY_CHGK_API_TO_CODE_MAPPING = {
     'e': 'EUR',
 	'r': 'RUB',
-	'd': 'USD',
-	'u': 'UAH',
+	'u': 'USD',
 }
