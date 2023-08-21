@@ -15,7 +15,7 @@ export class CurrencyController implements OnModuleInit {
         this.updateLatestCurrenciesRates();
     }
 
-    @Cron('* */12 * * *')
+    @Cron('0 */12 * * *')
     async updateLatestCurrenciesRates(): Promise<void> {
         try {
             const latestRates = await Promise.all(
