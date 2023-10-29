@@ -18,7 +18,7 @@ services:
       - ./docker-entrypoint-initdb.d/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
 
   app:
-    image: ghcr.io/thesafatem/chgk-polling-bot/chgk-polling-bot:develop
+    image: ghcr.io/thesafatem/chgk-polling-bot:master
     build: .
     container_name: app
     network_mode: host

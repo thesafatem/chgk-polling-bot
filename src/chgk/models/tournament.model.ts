@@ -23,6 +23,7 @@ export interface TournamentResponse {
 	maiiRating: boolean;
 	maiiRatingUpdatedAt: string;
 	questionQty: QuestionQty;
+	languages: Language[];
 }
 
 export interface Type {
@@ -58,18 +59,21 @@ export interface QuestionQty {
 	[key: string]: number;
 }
 
+export interface Language {
+	id: string;
+	name: string;
+}
+
 export enum Currency {
 	EUR = 'e',
 	RUB = 'r',
-	USD = 'd',
-	UAH = 'u',
+	USD = 'u',
 }
 
 export enum CurrencySign {
 	EUR = '€',
 	RUB = '₽',
 	USD = '$',
-	UAH = '₴',
 }
 
 export interface Tournament {
@@ -77,8 +81,12 @@ export interface Tournament {
 	name: string;
 	editors: Editor[];
 	difficulty: number;
-	cost: string;
 	questionsCount: number;
+	maiiAegis: boolean;
+	maiiRating: boolean;
+	mainPayment: number;
+	currency: Currency;
+	cost?: string;
 }
 export interface Editor {
 	id: number;

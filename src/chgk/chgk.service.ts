@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { lastValueFrom } from 'rxjs';
 import {
 	API_URL,
-	FREE_TOURNAMENT_MESSAGE,
+	RUSSIAN_LANGUAGE_ID,
 	SINHRON_TOURNAMENT_TYPE_ID,
 } from './chgk.constants';
 import { TournamentRequestResponse } from './models/tournament-requests.model';
@@ -30,6 +30,7 @@ export class ChgkService {
 						'dateStart[before]': dateEndAfter,
 						'dateEnd[after]': dateEndAfter,
 						type: SINHRON_TOURNAMENT_TYPE_ID,
+						languages: RUSSIAN_LANGUAGE_ID,
 					},
 				}),
 			);
@@ -89,10 +90,6 @@ export class ChgkService {
 	private parseTournaments(tournaments: TournamentResponse[]): Tournament[] {
 		const parsedTournaments = tournaments.map((tournament) => {
 			const editors: Editor[] = this.parseEditors(tournament.editors);
-			const cost: string = this.parseCost(
-				tournament.mainPayment,
-				tournament.currency,
-			);
 			const questionsCount: number = this.parseQuestionsCount(
 				tournament.questionQty,
 			);
@@ -101,11 +98,15 @@ export class ChgkService {
 				id: tournament.id,
 				name: tournament.name,
 				difficulty: tournament.difficultyForecast,
+				maiiAegis: tournament.maiiAegis,
+				maiiRating: tournament.maiiRating,
 				editors,
-				cost,
 				questionsCount,
+				mainPayment: tournament.mainPayment,
+				currency: tournament.currency,
 			};
 		});
+
 		return parsedTournaments;
 	}
 
@@ -119,24 +120,11 @@ export class ChgkService {
 		return parsedEditors;
 	}
 
-	private parseCost(mainPayment: number, currency: Currency): string {
-		if (mainPayment === 0) {
-			return FREE_TOURNAMENT_MESSAGE;
-		}
-		return mainPayment + this.getCurrencySign(currency);
-	}
-
-	public parseQuestionsCount(questionQty: QuestionQty): number {
+	private parseQuestionsCount(questionQty: QuestionQty): number {
 		let count = 0;
 		for (const key in questionQty) {
 			count += questionQty[key];
 		}
 		return count;
-	}
-
-	private getCurrencySign(currency: Currency): CurrencySign {
-		const currencyKey =
-			Object.keys(Currency)[Object.values(Currency).indexOf(currency)];
-		return CurrencySign[currencyKey];
 	}
 }
