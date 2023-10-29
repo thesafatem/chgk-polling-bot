@@ -20,5 +20,8 @@ jobs:
     - name: Run Yarn 
       run: yarn
 
+    - name: Install axios
+      run: yarn install @nestjs/axios
+
     - name: Run tests
       run: yarn test
