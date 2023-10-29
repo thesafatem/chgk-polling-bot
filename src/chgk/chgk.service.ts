@@ -43,23 +43,6 @@ export class ChgkService {
 		}
 	}
 
-	async getTournamentRequests(
-		tournamentId: number,
-	): Promise<TournamentRequestResponse[]> {
-		const { data: tournamentRequests } = await lastValueFrom(
-			this.httpService.get<TournamentRequestResponse[]>(
-				API_URL.tournamentRequests(tournamentId),
-				{
-					params: {
-						pagination: false,
-					},
-				},
-			),
-		);
-
-		return tournamentRequests;
-	}
-
 	async getTownsByName(townName: string): Promise<TownResponse[]> {
 		const { data: towns } = await lastValueFrom(
 			this.httpService.get<TownResponse[]>(API_URL.towns, {
@@ -84,6 +67,23 @@ export class ChgkService {
 		});
 
 		return found;
+	}
+
+	private async getTournamentRequests(
+		tournamentId: number,
+	): Promise<TournamentRequestResponse[]> {
+		const { data: tournamentRequests } = await lastValueFrom(
+			this.httpService.get<TournamentRequestResponse[]>(
+				API_URL.tournamentRequests(tournamentId),
+				{
+					params: {
+						pagination: false,
+					},
+				},
+			),
+		);
+
+		return tournamentRequests;
 	}
 
 	private parseTournaments(tournaments: TournamentResponse[]): Tournament[] {
@@ -126,7 +126,7 @@ export class ChgkService {
 		return mainPayment + this.getCurrencySign(currency);
 	}
 
-	private parseQuestionsCount(questionQty: QuestionQty): number {
+	public parseQuestionsCount(questionQty: QuestionQty): number {
 		let count = 0;
 		for (const key in questionQty) {
 			count += questionQty[key];
