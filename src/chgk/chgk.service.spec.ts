@@ -125,7 +125,10 @@ describe('ChgkService', () => {
 						surname: 'a',
 					},
 				],
-				cost: '1$',
+				maiiAegis: tournament.maiiAegis,
+				maiiRating: tournament.maiiRating,
+				mainPayment: tournament.mainPayment,
+				currency: tournament.currency,
 				questionsCount: 36,
 			});
 		});
