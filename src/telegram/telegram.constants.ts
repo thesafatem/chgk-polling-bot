@@ -85,9 +85,11 @@ export const INLINE_KEYBOARD_NUMBER_OF_TOURNAMENTS = [
 		{ name: '3', data: '3' },
 	],
 ];
-export const INLINE_KEYBOARD_CURRENCIES = [CURRENCIES.map(currency => {
-	return { 
-		name: currency, 
-		data: currency 
-	};
-})];
+export const INLINE_KEYBOARD_CURRENCIES = [
+	CURRENCIES.map((currency) => {
+		return {
+			name: currency,
+			data: currency,
+		};
+	}),
+];

@@ -112,7 +112,7 @@ describe('ChgkService', () => {
 		});
 
 		it('GET tournaments is OK', async () => {
-			const response = await service.getTournaments(new Date());
+			const response = await service.getTournaments(new Date(), new Date());
 
 			expect(response).toHaveLength(1);
 			expect(response[0]).toStrictEqual({

@@ -12,17 +12,11 @@ import {
 	TOWN_IS_NOT_SET,
 } from './telegram.constants';
 import { TelegramError } from './telegram.error';
-import {
-	IContext,
-	Hideable,
-	UpdateContext,
-} from './telegram.interface';
+import { IContext, Hideable, UpdateContext } from './telegram.interface';
 
 @Injectable()
 export class TelegramService {
-	constructor(
-		@InjectModel(Chat.name) private chatModel: Model<ChatDocument>,
-	) {}
+	constructor(@InjectModel(Chat.name) private chatModel: Model<ChatDocument>) {}
 
 	async upsertTownByChatId(
 		chatId: number,
@@ -35,7 +29,7 @@ export class TelegramService {
 
 	async upsertTimeZoneByChatId(
 		chatId: number,
-		timeZone: string
+		timeZone: string,
 	): Promise<ChatDocument | null> {
 		return this.chatModel
 			.findOneAndUpdate({ id: chatId }, { timeZone }, { upsert: true })
@@ -44,7 +38,7 @@ export class TelegramService {
 
 	async upsertCurrencyByChatId(
 		chatId: number,
-		currency: string
+		currency: string,
 	): Promise<ChatDocument | null> {
 		return this.chatModel
 			.findOneAndUpdate({ id: chatId }, { currency }, { upsert: true })

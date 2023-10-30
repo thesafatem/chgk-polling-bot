@@ -8,8 +8,6 @@ import {
 } from './chgk.constants';
 import { TournamentRequestResponse } from './models/tournament-requests.model';
 import {
-	Currency,
-	CurrencySign,
 	Editor,
 	QuestionQty,
 	Tournament,
@@ -22,12 +20,15 @@ import { TownResponse } from './models/town.model';
 export class ChgkService {
 	constructor(private readonly httpService: HttpService) {}
 
-	async getTournaments(dateEndAfter: Date | string): Promise<Tournament[]> {
+	async getTournaments(
+		dateStartBefore: Date | string,
+		dateEndAfter: Date | string,
+	): Promise<Tournament[]> {
 		try {
 			const { data: tournaments } = await lastValueFrom(
 				this.httpService.get<TournamentResponse[]>(API_URL.tournaments, {
 					params: {
-						'dateStart[before]': dateEndAfter,
+						'dateStart[before]': dateStartBefore,
 						'dateEnd[after]': dateEndAfter,
 						type: SINHRON_TOURNAMENT_TYPE_ID,
 						languages: RUSSIAN_LANGUAGE_ID,

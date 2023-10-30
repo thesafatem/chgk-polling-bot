@@ -17,7 +17,6 @@ export interface ITelegramModuleAsyncOptions
 
 interface SessionData {
 	weekDay: number;
-	hour: number;
 	numberOfTournaments: number;
 }
 export interface IContext extends Context {
