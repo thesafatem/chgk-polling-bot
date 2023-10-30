@@ -201,9 +201,8 @@ export class ChooseNumberOfTournamentsAction extends Command {
 				this.getTournamentNumberEmoji(tournamentNumber++) +
 				' ' +
 				tournament.name.bold();
-			const editors = (
-				'Редакторы: ' + this.getEditorsAsString(tournament.editors)
-			).preformat();
+			const editors =
+				'Редакторы: ' + this.getEditorsAsString(tournament.editors);
 			const questions = 'Вопросы: ' + tournament.questionsCount;
 			const difficulty =
 				'Сложность: ' + this.getDifficulty(tournament?.difficulty);
@@ -216,7 +215,7 @@ export class ChooseNumberOfTournamentsAction extends Command {
 			message +=
 				tournamentName +
 				'\n' +
-				editors +
+				editors.preformat() +
 				'\n' +
 				[questions, difficulty].join(tabulation).preformat() +
 				'\n' +
