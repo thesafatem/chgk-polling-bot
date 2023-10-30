@@ -1,24 +1,17 @@
-import { nextDay, Day, addMilliseconds, hoursToMilliseconds } from 'date-fns';
-import {
-	formatInTimeZone,
-	getTimezoneOffset,
-	utcToZonedTime,
-} from 'date-fns-tz';
+import { nextDay, Day, addDays } from 'date-fns';
+import { formatInTimeZone, utcToZonedTime } from 'date-fns-tz';
 
-export function getNextWeekDayDate(timezone: string, weekDay: Day | number, hours: number): Date {
+export function getNextWeekDayInterval(
+	timezone: string,
+	weekDay: Day | number,
+): [Date, Date] {
 	const today = utcToZonedTime(new Date(), timezone);
 	const year = today.getFullYear();
 	const month = today.getMonth();
 	const date = today.getDate();
-	const hoursMs = hoursToMilliseconds(hours);
-	const offsetMs = getTimezoneOffset(timezone);
-	const dateWithHours = addMilliseconds(
-		new Date(year, month, date),
-		hoursMs - offsetMs,
-	);
-
-	const nextDayValue = nextDay(dateWithHours, weekDay as Day);
-	return nextDayValue;
+	const nextDayValue = nextDay(new Date(year, month, date), weekDay as Day);
+	const nextDayPlusDayValue = addDays(nextDayValue, 1);
+	return [nextDayValue, nextDayPlusDayValue];
 }
 
 export function getFormattedDate(date: Date, timeZone: string): string {

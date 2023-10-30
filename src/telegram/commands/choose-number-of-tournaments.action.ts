@@ -11,7 +11,7 @@ import { Logger } from '@nestjs/common';
 import { TelegramError } from '../telegram.error';
 import {
 	getFormattedDate,
-	getNextWeekDayDate,
+	getNextWeekDayInterval,
 } from 'src/utils/datetime/datetime';
 import { MOSCOW_TIMEZONE } from 'src/chgk/chgk.constants';
 import { ChgkService } from 'src/chgk/chgk.service';
@@ -39,17 +39,19 @@ export class ChooseNumberOfTournamentsAction extends Command {
 					this.parseNumberOfTournamentsFromReplyKeyboard(ctx);
 				const { weekDay, numberOfTournaments } = ctx.session;
 				const chat = await this.telegramService.getChatById(ctx.chat.id);
+				const [startOfTheNextWeekDay, endOfTheNextWeekDay] =
+					getNextWeekDayInterval(chat.timeZone, weekDay);
 				const startOfTheNextWeekDayFormatted = getFormattedDate(
-					getNextWeekDayDate(chat.timeZone, weekDay, 0),
+					startOfTheNextWeekDay,
 					MOSCOW_TIMEZONE,
 				);
 				const endOfTheNextWeekDayFormatted = getFormattedDate(
-					getNextWeekDayDate(chat.timeZone, weekDay, 24),
+					endOfTheNextWeekDay,
 					MOSCOW_TIMEZONE,
 				);
 				let tournaments = await this.chgkService.getTournaments(
-					startOfTheNextWeekDayFormatted,
 					endOfTheNextWeekDayFormatted,
+					startOfTheNextWeekDayFormatted,
 				);
 				tournaments = await this.getNotPlayedTournaments(
 					tournaments,
