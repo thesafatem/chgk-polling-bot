@@ -8,27 +8,32 @@ export class CurrencyController implements OnModuleInit {
 	private readonly logger: Logger = new Logger(CurrencyController.name);
 
 	constructor(private readonly currencyService: CurrencyService) {}
-
 	onModuleInit() {
-		this.updateLatestCurrenciesRates();
+		// throw new Error('Method not implemented.');
 	}
 
-	@Cron('0 */12 * * *')
-	async updateLatestCurrenciesRates(): Promise<void> {
-		try {
-			const latestRates = await Promise.all(
-				Object.values(CURRENCY_CHGK_API_TO_CODE_MAPPING).map((baseCurrency) => {
-					return this.currencyService.getLatestRate(baseCurrency);
-				}),
-			);
+	// onModuleInit() {
+	// 	this.updateLatestCurrenciesRates();
+	// }
 
-			latestRates.forEach((latestRate) => {
-				this.currencyService.updateByBaseCurrency(latestRate);
-			});
-		} catch (e) {
-			if (e?.response?.status === 429) {
-				this.logger.error(e?.response?.data?.message);
-			}
-		}
-	}
+	// @Cron('0 */12 * * *')
+	// async updateLatestCurrenciesRates(): Promise<void> {
+	// 	try {
+	// 		const latestRates = await Promise.all(
+	// 			Object.values(CURRENCY_CHGK_API_TO_CODE_MAPPING).map((base) => {
+	// 				console.log('DABOODEE');
+	// 				return this.currencyService.getLatestRate(base);
+	// 			}),
+	// 		);
+
+	// 		latestRates.forEach((latestRate) => {
+	// 			this.currencyService.updateByBaseCurrency(latestRate);
+	// 		});
+	// 	} catch (e) {
+	// 		console.error(e);
+	// 		if (e?.response?.status === 429) {
+	// 			this.logger.error(e?.response?.data?.message);
+	// 		}
+	// 	}
+	// }
 }

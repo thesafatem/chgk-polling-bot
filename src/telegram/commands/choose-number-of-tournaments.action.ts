@@ -143,11 +143,10 @@ export class ChooseNumberOfTournamentsAction extends Command {
 			' ' +
 			CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency];
 		if (!chatCurrency) return paymentMessage;
-		const currencyRate =
-			await this.currencyService.getLatestRateOfTwoCurrencies(
-				CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency],
-				chatCurrency,
-			);
+		const currencyRate = await this.currencyService.getConversionRate(
+			CURRENCY_CHGK_API_TO_CODE_MAPPING[tournament.currency],
+			chatCurrency,
+		);
 		const newPayment = tournament.mainPayment * currencyRate;
 		return (
 			paymentMessage + ' (≈' + newPayment.toFixed(0) + ' ' + chatCurrency + ')'
