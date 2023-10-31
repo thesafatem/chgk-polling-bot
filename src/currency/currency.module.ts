@@ -3,10 +3,9 @@ import { CurrencyService } from './currency.service';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
 import { CurrencyController } from './currency.controller';
-import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
-	imports: [ConfigModule, HttpModule, CacheModule.register()],
+	imports: [ConfigModule, HttpModule],
 	providers: [CurrencyService],
 	exports: [CurrencyService],
 	controllers: [CurrencyController],

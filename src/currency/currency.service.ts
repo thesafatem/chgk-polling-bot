@@ -23,7 +23,6 @@ export class CurrencyService {
 		const cacheKey = from + '-' + to;
 		const cachedRate = await this.cacheManager.get<number>(cacheKey);
 		if (cachedRate) {
-			console.log('YOOHOO');
 			return cachedRate;
 		}
 

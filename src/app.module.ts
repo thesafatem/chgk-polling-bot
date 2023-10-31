@@ -10,6 +10,8 @@ import { TelegramModule } from './telegram/telegram.module';
 import { Chat, ChatSchema } from './telegram/models/chat.model';
 import { CurrencyModule } from './currency/currency.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CacheModule } from '@nestjs/cache-manager';
+import { getRedisConfig } from './configs/redis.config';
 
 @Module({
 	imports: [
@@ -18,7 +20,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 		ConfigModule.forRoot(),
 		TelegramModule.forRootAsync({
 			imports: [
-				ConfigModule, ChgkModule, CurrencyModule,
+				ConfigModule,
+				ChgkModule,
+				CurrencyModule,
 				MongooseModule.forFeature([
 					{
 						name: Chat.name,
@@ -33,6 +37,12 @@ import { ScheduleModule } from '@nestjs/schedule';
 			imports: [ConfigModule],
 			inject: [ConfigService],
 			useFactory: getMongoConfig,
+		}),
+		CacheModule.registerAsync({
+			imports: [ConfigModule],
+			useFactory: getRedisConfig,
+			inject: [ConfigService],
+			isGlobal: true,
 		}),
 		ScheduleModule.forRoot(),
 	],
