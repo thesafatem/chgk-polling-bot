@@ -20,6 +20,7 @@ services:
   redis:
     image: redis
     container_name: redis
+    network_mode: host
     restart: always
     env_file:
       - .env
@@ -44,8 +45,9 @@ services:
       - .env
     depends_on:
       - mongo
+      - redis
     
 volumes:
   mongo-data:
-  
+
   cache:
